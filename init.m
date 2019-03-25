@@ -29,8 +29,17 @@ for i = 1:N
     H(i, 1) = i * T;
 end
 
-C = cov(x(length(SNR), :)');
+C = A^2 / (2 * db2mag(SNR(length(SNR)))) * eye(N);
 est = (inv(H' * inv(C) * H) * H' * inv(C)) * unwrap(angle(x(length(SNR), :)))';
 
-plot(n, unwrap(angle(x(1, :))), n, unwrap(angle(x(2, :))), n, unwrap(angle(x(3, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(6, :))));
-legend("SNR -10", "SNR 0" , "SNR 10" , "SNR 20" , "SNR 30", "SNR 40");
+w_0_est = est(1);
+phi_est = est(2);
+
+x_gen = unwrap(angle(x(length(SNR), :)));
+x_est = unwrap(angle(A * exp(1j * (w_0_est * n' * T + phi_est))));
+
+plot(n, x_gen, n, x_est);
+legend("x_gen", "x_est");
+
+% plot(n, unwrap(angle(x(1, :))), n, unwrap(angle(x(2, :))), n, unwrap(angle(x(3, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(6, :))));
+% legend("SNR -10", "SNR 0" , "SNR 10" , "SNR 20" , "SNR 30", "SNR 40");
