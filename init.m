@@ -20,7 +20,7 @@ SNR = -10:10:40;
 x = zeros(length(SNR), N);
 for i = 1:length(SNR)
     variance = A^2 / (2 * db2mag(SNR(i)));
-    x(i, :) = gen_signal(w_0, N, A, T, phi, 0, sqrt(variance));
+    x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(variance));
 end
 
 
@@ -29,7 +29,8 @@ for i = 1:N
     H(i, 1) = i * T;
 end
 
-est = (inv(H' * H) * H') * unwrap(angle(x(1, :)))';
+C = cov(x(length(SNR), :)');
+est = (inv(H' * inv(C) * H) * H' * inv(C)) * unwrap(angle(x(length(SNR), :)))';
 
 plot(n, unwrap(angle(x(1, :))), n, unwrap(angle(x(2, :))), n, unwrap(angle(x(3, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(6, :))));
 legend("SNR -10", "SNR 0" , "SNR 10" , "SNR 20" , "SNR 30", "SNR 40");
