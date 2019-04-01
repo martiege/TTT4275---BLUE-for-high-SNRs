@@ -23,6 +23,7 @@ est = zeros(length(SNR), 2);
 H = [T * n', ones(length(n), 1)];
 C_base = eye(N);
 
+
 for i = 1:length(SNR)
     % variance = A^2 / (2 * db2mag(SNR(i)));
     x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(var(i)));
@@ -30,12 +31,45 @@ for i = 1:length(SNR)
     % BLUE(x(i, :), H, var(i) * C_base);
 end
 
-figure(1);
 CRLB_omega = (12 / (A^2 * T^2 * N * (N^2 - 1))) .* var;
 CRLB_phi = (12 * (n_0^2 * N + 2 * n_0 * P + Q) / (A^2 * N^2 * (N^2 - 1))) .* var;
-plot(SNR, CRLB_omega, SNR, est(:, 1));
+BLUE_omega = zeros(1, length(SNR));
+BLUE_phi = zeros(1, length(SNR));
+for i = 1:length(SNR)
+    C = inv(H' * inv(var(i) * C_base) * H);
+    BLUE_omega(1, i) = C(1, 1);
+    BLUE_phi(1, i) = C(2, 2);
+end
+
+figure(1);
+title('Plot of the variance of the estimated omega given by CRLB and BLUE');
+xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+ylabel('Variance of the estimate of omega from CRLB and BLUE');
+plot(SNR, CRLB_omega, SNR, BLUE_omega);
+legend('CRLB omega', 'BLUE omega');
 
 figure(2);
+title('Difference between the variance of the estimated omega');
+xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+ylabel('Difference of the variances of the estimate of omega from CRLB and BLUE');
+plot(SNR, BLUE_omega - CRLB_omega);
+legend('Omega: Difference between CRLB and BLUE');
+
+figure(3);
+title('Plot of the variance of the estimated phi given by CRLB and BLUE');
+xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+ylabel('Variance of the estimate of phi from CRLB and BLUE');
+plot(SNR, CRLB_phi, SNR, BLUE_phi);
+legend('CRLB phi', 'BLUE phi');
+
+figure(4);
+title('Difference between the variance of the estimated phi');
+xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+ylabel('Difference of the variances of the estimate of phi from CRLB and BLUE');
+plot(SNR, BLUE_phi - CRLB_phi);
+legend('Phi: Difference between CRLB and BLUE');
+
+figure(5);
 grid on;
 for i = 1:length(SNR)
    sig = A * exp(1j * (est(i, 1) * n' * T + mod(est(i, 2), pi)));
@@ -52,7 +86,7 @@ for i = 1:length(SNR)
 end
 legend(Legend);
 
-figure(3);
+figure(6);
 for i = 1:length(SNR)
     sig = A * exp(1j * (est(i, 1) * n' * T + mod(est(i, 2), pi)));
     plot(n, unwrap(angle(x(i, :))) - unwrap(angle(sig)));
