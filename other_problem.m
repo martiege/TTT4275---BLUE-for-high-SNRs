@@ -25,11 +25,15 @@ D = circshift(D_base, 1, 2) - D_base;
 
 for i = 1:length(SNR)
     x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(var(i)));
-%     for j = 1:N-1
-%         diff(i, j) = angle(x(i, j + 1)) - angle(x(i, j));
-%     end
-    C_inv = inv(var(i) * (D * D'));
-    est(i, 1) = inv(H' * C_inv * H) * (H' * C_inv * (D * angle(x(i, :)')));
+    for j = 1:N-1
+        diff(i, j) = angle(x(i, j + 1)) - angle(x(i, j));
+    end
+    
+    C = D * (var(i)) * D';
+    est(i, 1) = BLUE_c(diff(i, :)', H, C);
+    est(i, 1) = BLUE_c(D * angle(x(i, :)'), H, C);
+    % C_inv = inv(var(i) * (D * D'));
+    % est(i, 1) = inv(H' * C_inv * H) * (H' * C_inv * (D * angle(x(i, :)')));
     %inv(H' * inv(var(i) * D * D') * H) * H' * inv(var(i) * D * D') * D * angle(x(i, :)');
     %BLUE_c(D * angle(x(i, :)'), H, D * var(i) * eye(N) * D');
     %est(i, 2) = (1 / N) * sum(angle(x(i, :) - est(i, 1) * n));

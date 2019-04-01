@@ -41,33 +41,45 @@ for i = 1:length(SNR)
     BLUE_phi(1, i) = C(2, 2);
 end
 
-figure(1);
-title('Plot of the variance of the estimated omega given by CRLB and BLUE');
-xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+f1 = figure(1);
+grid on;
+title('Variance of estimated omega for CRLB and BLUE');
+xlabel('SNR [dB]');
 ylabel('Variance of the estimate of omega from CRLB and BLUE');
 plot(SNR, CRLB_omega, SNR, BLUE_omega);
 legend('CRLB omega', 'BLUE omega');
 
-figure(2);
+saveas(f1, 'figures/var_est_omega', 'epsc');
+
+f2 = figure(2);
+grid on;
 title('Difference between the variance of the estimated omega');
-xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+xlabel('SNR [dB]');
 ylabel('Difference of the variances of the estimate of omega from CRLB and BLUE');
 plot(SNR, BLUE_omega - CRLB_omega);
 legend('Omega: Difference between CRLB and BLUE');
 
-figure(3);
+saveas(f2, 'figures/diff_var_est_omega', 'epsc');
+
+f3 = figure(3);
+grid on;
 title('Plot of the variance of the estimated phi given by CRLB and BLUE');
-xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+xlabel('SNR [dB]');
 ylabel('Variance of the estimate of phi from CRLB and BLUE');
 plot(SNR, CRLB_phi, SNR, BLUE_phi);
 legend('CRLB phi', 'BLUE phi');
 
-figure(4);
+saveas(f3, 'figures/var_est_phi', 'epsc');
+
+f4 = figure(4);
+grid on;
 title('Difference between the variance of the estimated phi');
-xlabel('Signal to Noise Ratio from -10 [dB] to 40 [dB]');
+xlabel('SNR [dB]');
 ylabel('Difference of the variances of the estimate of phi from CRLB and BLUE');
 plot(SNR, BLUE_phi - CRLB_phi);
 legend('Phi: Difference between CRLB and BLUE');
+
+saveas(f4, 'figures/diff_var_est_phi', 'epsc');
 
 figure(5);
 grid on;
@@ -86,10 +98,14 @@ for i = 1:length(SNR)
 end
 legend(Legend);
 
-figure(6);
+f6 = figure(6);
+title('Unwrapped angle of signals');
+ylabel('Angle [rad]');
+xlabel('SNR [dB]');
+grid on;
 for i = 1:length(SNR)
     sig = A * exp(1j * (est(i, 1) * n' * T + mod(est(i, 2), pi)));
-    plot(n, unwrap(angle(x(i, :))) - unwrap(angle(sig)));
+    plot(n, unwrap(angle(x(i, :))));
     if i == 1
         hold on;
     end
@@ -98,9 +114,10 @@ hold off;
 
 Legend = cell(length(SNR), 1);
 for i = 1:length(SNR)
-    Legend{i} = strcat('Original signal: ', num2str(i));
+    Legend{i} = strcat('Signal: ', num2str(i));
 end
 legend(Legend);
+saveas(f6, 'figures/unwrapped_angles', 'epsc');
 
 % H = [T * n', ones(length(n), 1)];
 % C = A^2 / (2 * db2mag(SNR(length(SNR)))) * eye(N);
