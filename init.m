@@ -41,83 +41,7 @@ for i = 1:length(SNR)
     BLUE_phi(1, i) = C(2, 2);
 end
 
-f1 = figure(1);
-grid on;
-title('Variance of estimated omega for CRLB and BLUE');
-xlabel('SNR [dB]');
-ylabel('Variance of the estimate of omega from CRLB and BLUE');
-plot(SNR, CRLB_omega, SNR, BLUE_omega);
-legend('CRLB omega', 'BLUE omega');
 
-saveas(f1, 'figures/var_est_omega', 'epsc');
-
-f2 = figure(2);
-grid on;
-title('Difference between the variance of the estimated omega');
-xlabel('SNR [dB]');
-ylabel('Difference of the variances of the estimate of omega from CRLB and BLUE');
-plot(SNR, BLUE_omega - CRLB_omega);
-legend('Omega: Difference between CRLB and BLUE');
-
-saveas(f2, 'figures/diff_var_est_omega', 'epsc');
-
-f3 = figure(3);
-grid on;
-title('Plot of the variance of the estimated phi given by CRLB and BLUE');
-xlabel('SNR [dB]');
-ylabel('Variance of the estimate of phi from CRLB and BLUE');
-plot(SNR, CRLB_phi, SNR, BLUE_phi);
-legend('CRLB phi', 'BLUE phi');
-
-saveas(f3, 'figures/var_est_phi', 'epsc');
-
-f4 = figure(4);
-grid on;
-title('Difference between the variance of the estimated phi');
-xlabel('SNR [dB]');
-ylabel('Difference of the variances of the estimate of phi from CRLB and BLUE');
-plot(SNR, BLUE_phi - CRLB_phi);
-legend('Phi: Difference between CRLB and BLUE');
-
-saveas(f4, 'figures/diff_var_est_phi', 'epsc');
-
-figure(5);
-grid on;
-for i = 1:length(SNR)
-   sig = A * exp(1j * (est(i, 1) * n' * T + mod(est(i, 2), pi)));
-   y = unwrap(angle(sig));
-   plot(n, y)
-   if i == 1
-       hold on;
-   end
-end
-hold off;
-Legend = cell(length(SNR), 1);
-for i = 1:length(SNR)
-    Legend{i} = strcat('Signal to Noise Ratio: ', num2str(SNR(i)));
-end
-legend(Legend);
-
-f6 = figure(6);
-title('Unwrapped angle of signals');
-ylabel('Angle [rad]');
-xlabel('SNR [dB]');
-grid on;
-for i = 1:length(SNR)
-    sig = A * exp(1j * (est(i, 1) * n' * T + mod(est(i, 2), pi)));
-    plot(n, unwrap(angle(x(i, :))));
-    if i == 1
-        hold on;
-    end
-end
-hold off;
-
-Legend = cell(length(SNR), 1);
-for i = 1:length(SNR)
-    Legend{i} = strcat('Signal: ', num2str(i));
-end
-legend(Legend);
-saveas(f6, 'figures/unwrapped_angles', 'epsc');
 
 % H = [T * n', ones(length(n), 1)];
 % C = A^2 / (2 * db2mag(SNR(length(SNR)))) * eye(N);
@@ -137,14 +61,49 @@ saveas(f6, 'figures/unwrapped_angles', 'epsc');
 % legend("SNR -10", "SNR 0" , "SNR 10" , "SNR 20" , "SNR 30", "SNR 40");
 
 
-diff = zeros(length(SNR), N);
+differ = zeros(length(SNR), N);
 for snr = 1:length(SNR)
     for i = 1:N-1
-        diff(snr, i) = angle(x(snr, i + 1)) - angle(x(snr, i));
+        differ(snr, i) = angle(x(snr, i + 1)) - angle(x(snr, i));
     end
 end
 
-H_coloured = T * n';
+SNR = -10:10:40;
+%x = zeros(length(SNR), N);
+differ = zeros(length(SNR), N - 1);
+var = (A^2 / 2) ./ db2mag(SNR);
+est2 = zeros(length(SNR), 2);
+H_c_base = T * ones(N-1, 1);
+D_base = diag([ones(1, N-1), 0]);
+D_base = D_base(1:N-1, 1:N);
+D = circshift(D_base, 1, 2) - D_base;
+H_c = H_c_base;
+C_c_base = D * C_base * D';
+
+for i = 1:length(SNR)
+    %x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(var(i)));
+    y = angle(x(i, :));
+    for j = 1:N-1
+        differ(i, j) = mod(y(j + 1) - y(j), pi);
+    end
+    %differ(i, :) = diff(y);
+    
+    C_c = var(i) * C_c_base;
+    % est(i, 1) = BLUE_c(diff(i, :)', H, C);
+    est2(i, 1) = inv(H_c' * inv(C_c) * H_c) * H_c' * inv(C_c) * differ(i, :)';
+    F_sum = 0;
+    for j = 1:N
+        F_sum = F_sum + x(i, j) * exp(-1j * est2(i, 1) * n(i) * T);
+    end
+    
+    est2(i, 2) = angle(exp(-1j * est2(i, 1) * n_0 * T) * (F_sum / N));
+    % BLUE_c(differ(i, :)', H, C);
+    % C_inv = inv(var(i) * (D * D'));
+    % est(i, 1) = inv(H' * C_inv * H) * (H' * C_inv * (D * angle(x(i, :)')));
+    % inv(H' * inv(var(i) * D * D') * H) * H' * inv(var(i) * D * D') * D * angle(x(i, :)');
+    % BLUE_c(D * angle(x(i, :)'), H, D * var(i) * eye(N) * D');
+    % est(i, 2) = (1 / N) * sum(angle(x(i, :) - est(i, 1) * n));
+end
 
 
 
