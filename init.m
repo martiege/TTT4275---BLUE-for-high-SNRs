@@ -96,7 +96,7 @@ for i = 1:length(SNR)
         F_sum = F_sum + x(i, j) * exp(-1j * est2(i, 1) * n(i) * T);
     end
     
-    est2(i, 2) = angle(exp(-1j * est2(i, 1) * n_0 * T) * (F_sum / N));
+    est2(i, 2) = mod(angle(exp(-1j * est2(i, 1) * n_0 * T) * (F_sum / N)), pi);
     % BLUE_c(differ(i, :)', H, C);
     % C_inv = inv(var(i) * (D * D'));
     % est(i, 1) = inv(H' * C_inv * H) * (H' * C_inv * (D * angle(x(i, :)')));
