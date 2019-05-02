@@ -42,8 +42,9 @@ for i = 1:length(SNR)
     % est(i, 1) = BLUE_c(diff(i, :)', H, C);
     est(i, 1) = abs(BLUE_c(diff(i, :)', H, C));
     
-    fourier = F(x(i, :), N, est(i, 1), T);
-    est(i, 2) = mod(angle(exp(-1j*est(i,1)*n_0*T)*fourier), pi/2); %something wierd goin on here
+    fourier = F(x(i, :), N, est(i, 1), T, n);
+    %fourier = F(x(i, :), N, w_0, T);
+    est(i, 2) = mod(angle(exp(-1j*est(i,1)*n_0*T)*fourier), pi); %something wierd goin on here
         %It is the line stated in the assigment text, but it's not giving
         %the correct result.
     
