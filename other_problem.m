@@ -16,7 +16,7 @@ n = n_0:n_N;
 SNR = -10:10:40;
 x = zeros(length(SNR), N);
 v = zeros(length(SNR), N);
-v_c = v;
+v = v;
 diff = zeros(length(SNR), N - 1);
 var = (A^2 / 2) ./ db2mag(SNR);
 est = zeros(length(SNR), 2);
@@ -31,20 +31,20 @@ hpFilter = designfilt('bandpassiir', 'FilterOrder', 10, ...
 for i = 1:length(SNR)
     x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(var(i)));
     v(i, :) = gen_noise(N, 0, sqrt(var(i)));
-    v_c(i,:) = filter(hpFilter, v(i,:)); %coloring noise
+    %v(i,:) = filter(hpFilter, v(i,:)); %coloring noise
     y = angle(x(i, :))';
     for j = 1:N-1
         %diff(i, j) = y(j + 1) - y(j);
-        diff(i, j) = w_0*T + v_c(j+1) - v_c(j);
+        diff(i, j) = w_0*T + v(j+1) - v(j);
     end
     
     C = D * (var(i)) * D';
     % est(i, 1) = BLUE_c(diff(i, :)', H, C);
     est(i, 1) = abs(BLUE_c(diff(i, :)', H, C));
     
-    fourier = F(x(i, :), N, est(i, 1), T, n);
+    fourier = F(N, est(i, 1), T);
     %fourier = F(x(i, :), N, w_0, T);
-    est(i, 2) = mod(angle(exp(-1j*est(i,1)*n_0*T)*fourier), pi); %something wierd goin on here
+    est(i, 2) = angle(exp(-1j*est(i,1)*n_0*T)*fourier); %something wierd goin on here
         %It is the line stated in the assigment text, but it's not giving
         %the correct result.
     
@@ -61,7 +61,7 @@ CRLB_omega = (12 / (A^2 * T^2 * N * (N^2 - 1))) .* var;
 
 
 
-wfft = fft(v_c(6,:));     
+wfft = fft(v(6,:));     
 f = (0:length(wfft)-1)*50/length(wfft);
 
 plot(f,abs(wfft))
