@@ -41,26 +41,6 @@ for i = 1:length(SNR)
     BLUE_phi(1, i) = C(2, 2);
 end
 
-
-
-% H = [T * n', ones(length(n), 1)];
-% C = A^2 / (2 * db2mag(SNR(length(SNR)))) * eye(N);
-% est = (inv(H' * inv(C) * H) * H' * inv(C)) * unwrap(angle(x(length(SNR), :)))';
-% est = BLUE(x(length(SNR), :), H, C);
-% 
-% w_0_est = est(1);
-% phi_est = est(2);
-% 
-% x_gen = unwrap(angle(x(length(SNR), :)));
-% x_est = unwrap(angle(A * exp(1j * (w_0_est * n' * T + phi_est))));
-% 
-% plot(n, x_gen, n, x_est);
-% legend("x_gen", "x_est");
-
-% plot(n, unwrap(angle(x(1, :))), n, unwrap(angle(x(2, :))), n, unwrap(angle(x(3, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(4, :))), n, unwrap(angle(x(6, :))));
-% legend("SNR -10", "SNR 0" , "SNR 10" , "SNR 20" , "SNR 30", "SNR 40");
-
-
 differ = zeros(length(SNR), N);
 for snr = 1:length(SNR)
     for i = 1:N-1
@@ -69,7 +49,6 @@ for snr = 1:length(SNR)
 end
 
 SNR = -10:10:40;
-%x = zeros(length(SNR), N);
 differ = zeros(length(SNR), N - 1);
 var = (A^2 / 2) ./ db2mag(SNR);
 est2 = zeros(length(SNR), 2);
@@ -81,15 +60,12 @@ H_c = H_c_base;
 C_c_base = D * C_base * D';
 
 for i = 1:length(SNR)
-    %x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(var(i)));
     y = angle(x(i, :));
     for j = 1:N-1
         differ(i, j) = mod(y(j + 1) - y(j), pi);
     end
-    %differ(i, :) = diff(y);
     
     C_c = var(i) * C_c_base;
-    % est(i, 1) = BLUE_c(diff(i, :)', H, C);
     est2(i, 1) = inv(H_c' * inv(C_c) * H_c) * H_c' * inv(C_c) * differ(i, :)';
     F_sum = 0;
     for j = 1:N
@@ -97,12 +73,6 @@ for i = 1:length(SNR)
     end
     
     est2(i, 2) = mod(angle(exp(-1j * est2(i, 1) * n_0 * T) * (F_sum / N)), pi);
-    % BLUE_c(differ(i, :)', H, C);
-    % C_inv = inv(var(i) * (D * D'));
-    % est(i, 1) = inv(H' * C_inv * H) * (H' * C_inv * (D * angle(x(i, :)')));
-    % inv(H' * inv(var(i) * D * D') * H) * H' * inv(var(i) * D * D') * D * angle(x(i, :)');
-    % BLUE_c(D * angle(x(i, :)'), H, D * var(i) * eye(N) * D');
-    % est(i, 2) = (1 / N) * sum(angle(x(i, :) - est(i, 1) * n));
 end
 
 

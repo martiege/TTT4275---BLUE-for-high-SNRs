@@ -1,6 +1,4 @@
 function est = BLUE(signal, H, C)
-%BLUE Summary of this function goes here
-%   Detailed explanation goes here
 
 M1 = C \ H;
 M2 = H' * M1;
