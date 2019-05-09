@@ -16,8 +16,8 @@ n = n_0:n_N;
 SNR = -10:10:40;
 x = zeros(length(SNR), N);
 v = zeros(length(SNR), N);
-v = v;
-diff = zeros(length(SNR), N - 1);
+
+x_diff = zeros(length(SNR), N - 1);
 var = (A^2 / 2) ./ db2mag(SNR);
 est = zeros(length(SNR), 2);
 H = T * ones(N-1, 1);
@@ -25,22 +25,17 @@ D_base = diag([ones(1, N-1), 0]);
 D_base = D_base(1:N-1, 1:N);
 D = circshift(D_base, 1, 2) - D_base;
 
-%hpFilter = designfilt('bandpassiir', 'FilterOrder', 10, ...
-%    'HalfPowerFrequency1', 80, 'HalfPowerFrequency2', 120, 'SampleRate', 500);
-
 for i = 1:length(SNR)
-    x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(var(i)));
+    x(i, :) = gen_signal(w_0, n, A, T, phi, 0, 0);
     v(i, :) = gen_noise(N, 0, sqrt(var(i)));
-    %v(i,:) = filter(hpFilter, v(i,:)); %coloring noise
+    
     y = angle(x(i, :))';
     for j = 1:N-1
-        %diff(i, j) = y(j + 1) - y(j);
-        diff(i, j) = w_0*T + v(j+1) - v(j);
+        x_diff(i, j) = w_0*T + v(j+1) - v(j);
     end
     
     C = D * (var(i)) * D';
-    % est(i, 1) = BLUE_c(diff(i, :)', H, C);
-    est(i, 1) = abs(BLUE_c(diff(i, :)', H, C));
+    est(i, 1) = abs(BLUE_c(x_diff(i, :)', H, C));
     
     %fourier = F(N, est(i, 1), T);
     res = zeros(N, 1);
@@ -71,4 +66,10 @@ wfft = fft(v(6,:));
 f = (0:length(wfft)-1)*50/length(wfft);
 
 plot(f,abs(wfft))
+
+figure(1)
+subplot(2,1,1)
+plot(n,x)
+subplot(2,1,2)
+plot(n,angle(x))
 

@@ -20,14 +20,14 @@ SNR = -10:10:40;
 x = zeros(length(SNR), N);
 var = (A^2 / 2) ./ db2mag(SNR);
 est = zeros(length(SNR), 2);
-H = [T * n', ones(length(n), 1)];
+H_b = [T * n', ones(length(n), 1)];
 C_base = eye(N);
 
 
 for i = 1:length(SNR)
     % variance = A^2 / (2 * db2mag(SNR(i)));
     x(i, :) = gen_signal(w_0, n, A, T, phi, 0, sqrt(var(i)));
-    est(i, :) = BLUE(x(i, :), H, var(i) * C_base);
+    est(i, :) = BLUE(x(i, :), H_b, var(i) * C_base);
     % BLUE(x(i, :), H, var(i) * C_base);
 end
 
@@ -36,7 +36,7 @@ CRLB_phi = (12 * (n_0^2 * N + 2 * n_0 * P + Q) / (A^2 * N^2 * (N^2 - 1))) .* var
 BLUE_omega = zeros(1, length(SNR));
 BLUE_phi = zeros(1, length(SNR));
 for i = 1:length(SNR)
-    C = inv(H' * inv(var(i) * C_base) * H);
+    C = inv(H_b' * inv(var(i) * C_base) * H_b);
     BLUE_omega(1, i) = C(1, 1);
     BLUE_phi(1, i) = C(2, 2);
 end
