@@ -1,6 +1,4 @@
 function res = F(N, w_0_est, T)
-%F Summary of this function goes here
-%   Detailed explanation goes here
 res = 0;
 
 for n = 1:N

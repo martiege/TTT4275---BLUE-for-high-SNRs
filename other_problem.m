@@ -17,6 +17,7 @@ SNR = -10:10:40;
 x = zeros(length(SNR), N);
 v = zeros(length(SNR), N);
 
+
 x_diff = zeros(length(SNR), N - 1);
 var = (A^2 / 2) ./ db2mag(SNR);
 est = zeros(length(SNR), 2);
@@ -36,30 +37,17 @@ for i = 1:length(SNR)
     
     C = D * (var(i)) * D';
     est(i, 1) = abs(BLUE_c(x_diff(i, :)', H, C));
-    
-    %fourier = F(N, est(i, 1), T);
+
     res = zeros(N, 1);
     for n_ = 1:N
         res(n_) = x(i, n_) * exp(-1j * est(i, 1) * (n_ - 1)*T);
     end
     
     fourier = mean(res);
-    %fourier = F(x(i, :), N, w_0, T);
-    est(i, 2) = angle(exp(-1j*est(i,1)*n_0*T)*fourier); %something wierd goin on here
-        %It is the line stated in the assigment text, but it's not giving
-        %the correct result.
-    
-    % C_inv = inv(var(i) * (D * D'));
-    % est(i, 1) = inv(H' * C_inv * H) * (H' * C_inv * (D * angle(x(i, :)')));
-    %inv(H' * inv(var(i) * D * D') * H) * H' * inv(var(i) * D * D') * D * angle(x(i, :)');
-    %BLUE_c(D * angle(x(i, :)'), H, D * var(i) * eye(N) * D');
-    %est(i, 2) = (1 / N) * sum(angle(x(i, :) - est(i, 1) * n));
+    est(i, 2) = angle(exp(-1j*est(i,1)*n_0*T)*fourier); 
 end
 
 CRLB_omega = (12 / (A^2 * T^2 * N * (N^2 - 1))) .* var;
-
-%Filter here
-
 
 
 wfft = fft(v(6,:));     
